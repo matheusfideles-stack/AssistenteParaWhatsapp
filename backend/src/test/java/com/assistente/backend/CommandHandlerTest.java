@@ -74,6 +74,23 @@ class CommandHandlerTest {
     }
 
     @Test
+    void proximasListaTarefasDasProximas24Horas() {
+        handler.handle("daqui 1 hora estudar Java", null);
+        CommandResult result = handler.handle("proximas", null);
+        assertTrue(result.text().contains("PRÓXIMAS 24H"));
+        assertTrue(result.text().contains("Estudar Java"));
+    }
+
+    @Test
+    void proximasNaoListaTarefaDaquiMaisDeUmDia() {
+        handler.handle("Todo dia às 20h estudar Java", null);
+        long id = taskService.findAll().get(0).getId();
+        taskService.reschedule(id, LocalDate.now().plusDays(5), LocalTime.of(20, 0));
+        CommandResult result = handler.handle("proximas", null);
+        assertTrue(result.text().contains("Nenhuma tarefa encontrada"));
+    }
+
+    @Test
     void concluirPorIdMarcaComoConcluida() {
         handler.handle("Hoje às 19h estudar Java", null);
         long id = taskService.findAll().get(0).getId();
@@ -138,6 +155,41 @@ class CommandHandlerTest {
         long id = taskService.findAll().get(0).getId();
         handler.handle("3", id);
         assertEquals("CANCELLED", taskService.get(id).getStatus().name());
+    }
+
+    @Test
+    void respostaPalavraConcluirConcluiLembreteAtivo() {
+        handler.handle("Hoje às 19h estudar Java", null);
+        long id = taskService.findAll().get(0).getId();
+        CommandResult result = handler.handle("concluir", id);
+        assertTrue(result.text().contains("concluída"));
+        assertTrue(result.clearActiveReminder());
+        assertEquals("COMPLETED", taskService.get(id).getStatus().name());
+    }
+
+    @Test
+    void respostaPalavraAdiarAdiaLembreteAtivoEm30Minutos() {
+        handler.handle("Hoje às 19h estudar Java", null);
+        long id = taskService.findAll().get(0).getId();
+        handler.handle("adiar", id);
+        assertEquals(LocalTime.of(19, 30), taskService.get(id).getDueTime());
+    }
+
+    @Test
+    void respostaPalavraCancelarCancelaLembreteAtivo() {
+        handler.handle("Hoje às 19h estudar Java", null);
+        long id = taskService.findAll().get(0).getId();
+        handler.handle("cancelar", id);
+        assertEquals("CANCELLED", taskService.get(id).getStatus().name());
+    }
+
+    @Test
+    void concluirPorIdContinuaFuncionandoSemLembreteAtivo() {
+        handler.handle("Hoje às 19h estudar Java", null);
+        long id = taskService.findAll().get(0).getId();
+        CommandResult result = handler.handle("concluir #" + id, null);
+        assertTrue(result.text().contains("concluída"));
+        assertEquals("COMPLETED", taskService.get(id).getStatus().name());
     }
 
     @Test

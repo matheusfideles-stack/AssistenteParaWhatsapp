@@ -192,6 +192,17 @@ public class TaskService {
         return repository.findByDate(LocalDate.now().plusDays(1));
     }
 
+    /** Tarefas pendentes com vencimento entre agora e daqui a N horas, ordenadas por horario. */
+    public List<Task> findUpcoming(int hours) {
+        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime limit = now.plusHours(hours);
+        return repository.findByStatus(TaskStatus.PENDING).stream()
+                .filter(t -> t.getDueDateTime() != null)
+                .filter(t -> !t.getDueDateTime().isBefore(now) && !t.getDueDateTime().isAfter(limit))
+                .sorted(Comparator.comparing(Task::getDueDateTime))
+                .toList();
+    }
+
     public List<Task> search(String term) {
         if (term == null || term.isBlank()) {
             return findAll();

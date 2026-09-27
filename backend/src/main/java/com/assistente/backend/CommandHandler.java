@@ -40,6 +40,7 @@ public class CommandHandler {
             ⏳ pendentes
             ✅ concluidas
             ⚠️ atrasadas
+            ⏭️ proximas — próximas 24h
             🔴 prioridade — alta prioridade
             🔍 buscar <termo>
 
@@ -54,7 +55,7 @@ public class CommandHandler {
             💾 backup — exporta suas tarefas em .csv
             ❓ ajuda — mostra esta mensagem
 
-            Quando um lembrete chegar, responda *1* para concluir, *2* para adiar 30 min ou *3* para cancelar.""";
+            Quando um lembrete chegar, responda *1* (ou "concluir"), *2* (ou "adiar") ou *3* (ou "cancelar").""";
 
     private static final Pattern P_BUSCAR = Pattern.compile("^(buscar|pesquisar)\\s+(.+)$", Pattern.CASE_INSENSITIVE);
     private static final Pattern P_CONCLUIR = Pattern.compile("^conclu[ií]r\\s*#?(\\d+)$", Pattern.CASE_INSENSITIVE);
@@ -83,8 +84,11 @@ public class CommandHandler {
         }
         String lower = text.toLowerCase(Locale.ROOT);
 
-        if (activeReminderId != null && text.matches("[123]")) {
-            return handleReminderShortcut(text, activeReminderId);
+        if (activeReminderId != null) {
+            String shortcut = normalizeReminderShortcut(lower);
+            if (shortcut != null) {
+                return handleReminderShortcut(shortcut, activeReminderId);
+            }
         }
 
         if (lower.equals("ajuda") || lower.equals("menu") || lower.equals("help") || lower.equals("?")) {
@@ -107,6 +111,9 @@ public class CommandHandler {
         }
         if (lower.equals("atrasadas")) {
             return CommandResult.of(listTasks(taskService.findOverdue(), "⚠️ TAREFAS ATRASADAS"));
+        }
+        if (lower.equals("proximas") || lower.equals("próximas")) {
+            return CommandResult.of(listTasks(taskService.findUpcoming(24), "⏭️ PRÓXIMAS 24H"));
         }
         if (lower.equals("prioridade") || lower.equals("urgentes") || lower.equals("prioridades")) {
             return CommandResult.of(listTasks(taskService.findHighPriority(), "🔴 ALTA PRIORIDADE"));
@@ -137,6 +144,20 @@ public class CommandHandler {
 
         // Nenhum comando reconhecido -> trata como criacao de tarefa em linguagem natural
         return createFromText(text);
+    }
+
+    /** Aceita tanto o numero do atalho (1/2/3) quanto a palavra correspondente, digitados sem #id. */
+    private String normalizeReminderShortcut(String lower) {
+        if (lower.equals("1") || lower.equals("concluir")) {
+            return "1";
+        }
+        if (lower.equals("2") || lower.equals("adiar")) {
+            return "2";
+        }
+        if (lower.equals("3") || lower.equals("cancelar")) {
+            return "3";
+        }
+        return null;
     }
 
     private CommandResult handleReminderShortcut(String digit, long taskId) {

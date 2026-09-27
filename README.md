@@ -138,6 +138,7 @@ minutos até eu concluir`, `prioridade alta`, etc. — veja exemplos digitando
 | `pendentes` | tarefas pendentes |
 | `concluidas` | tarefas concluídas |
 | `atrasadas` | tarefas atrasadas |
+| `proximas` | tarefas das próximas 24h |
 | `prioridade` | tarefas de alta prioridade |
 | `buscar <termo>` | pesquisa por título/descrição |
 | `concluir #<id>` | marca como concluída |
@@ -147,8 +148,12 @@ minutos até eu concluir`, `prioridade alta`, etc. — veja exemplos digitando
 | `reagendar #<id> <dd/mm> <hh:mm>` | reagenda para nova data/hora |
 | `backup` | exporta e envia um `.csv` com todas as tarefas |
 
-Quando um lembrete chega, responder só **1**, **2** ou **3** já
-concluir/adia 30 min/cancela a tarefa daquele lembrete.
+Quando um lembrete chega, responder **1**/**concluir**, **2**/**adiar** ou
+**3**/**cancelar** já conclui/adia 30 min/cancela a tarefa daquele lembrete.
+
+Além da mensagem no WhatsApp, cada lembrete também dispara uma **notificação
+nativa do Windows** (toast) no PC onde o bot está rodando — útil quando o
+celular está longe.
 
 ## Estrutura do projeto
 
@@ -180,8 +185,8 @@ AssistenteWhatsapp/
 ```bash
 npm test
 ```
-`ApiClient`, `CommandHandler` e `backendLauncher` — 14 testes com
-`node:test`, sem dependências extras.
+`ApiClient`, `CommandHandler`, `backendLauncher` e `desktopNotifier` — 17
+testes com `node:test`, sem dependências extras.
 
 **Backend (Java):**
 ```bash

@@ -1,10 +1,12 @@
 import { ApiClient } from './services/apiClient.js';
 import { ensureBackendRunning } from './services/backendLauncher.js';
+import { redirectSessionNoiseToFile } from './services/sessionLogFilter.js';
 import { CommandHandler } from './bot/commandHandler.js';
 import { createWhatsAppBot } from './bot/whatsappClient.js';
 import { loadConfig } from './config.js';
 
 async function main() {
+    redirectSessionNoiseToFile();
     console.log('🤖 Assistente Pessoal para WhatsApp — iniciando...\n');
 
     const config = loadConfig();

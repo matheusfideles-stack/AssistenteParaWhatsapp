@@ -9,6 +9,7 @@ import {
 import { Boom } from '@hapi/boom';
 import pino from 'pino';
 import qrcode from 'qrcode-terminal';
+import { notifyReminder } from '../services/desktopNotifier.js';
 
 const AUTH_DIR = path.resolve(process.cwd(), 'auth');
 const REMINDER_POLL_INTERVAL_MS = 15_000;
@@ -147,6 +148,7 @@ export function createWhatsAppBot({ commandHandler, apiClient }) {
         }
         for (const reminder of reminders) {
             activeReminderId = reminder.taskId;
+            notifyReminder(reminder.text);
             await sock.sendMessage(ownJid, { text: reminder.text });
         }
     }
