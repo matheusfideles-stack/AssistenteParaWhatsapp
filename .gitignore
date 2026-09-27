@@ -10,3 +10,8 @@ config.json
 backup-*.csv
 .idea/
 .vscode/
+*.iml
+
+# backend Java (Maven)
+backend/target/
+backend/data/

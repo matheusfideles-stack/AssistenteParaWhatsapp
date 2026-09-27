@@ -1,10 +1,11 @@
 {
   "name": "assistente-whatsapp",
   "version": "1.0.0",
-  "description": "Bot do WhatsApp (cliente) que fala com o AssistentePessoal-Backend (Java) - 100% local e gratuito, sem API paga.",
+  "description": "Assistente pessoal de tarefas e lembretes pelo WhatsApp - bot em Node.js + backend em Java (Spring Boot), tudo num projeto so, 100% local e gratuito.",
   "type": "module",
   "main": "src/index.js",
   "scripts": {
+    "build:backend": "mvn -q -f backend/pom.xml clean package -DskipTests",
     "start": "node src/index.js",
     "test": "node --test"
   },

@@ -29,31 +29,31 @@ Bot:  ✅ Tarefa concluída!
 
 ---
 
-## Como funciona (sem violar as regras que você definiu)
+## Como funciona
 
-Este projeto tem **duas partes**, que precisam rodar juntas:
+Um projeto só, mas com duas partes por baixo dos panos:
 
-1. **[AssistentePessoal-Backend](../AssistentePessoal-Backend)** (Java +
-   Spring Boot) — tem toda a lógica: entende a frase, guarda a tarefa no
-   SQLite, decide quando lembrar. É o mesmo código (testado) que também
-   roda no [app desktop](../AssistentePessoal) original.
-2. **Este bot** (Node.js) — só fala o protocolo do WhatsApp (via
-   [Baileys](https://github.com/WhiskeySockets/Baileys)) e repassa
-   mensagens de/para o backend Java por HTTP local.
+- **Node.js** fala o protocolo do WhatsApp (via
+  [Baileys](https://github.com/WhiskeySockets/Baileys), open source e
+  gratuito) e repassa suas mensagens.
+- **Java (Spring Boot)**, na pasta [`backend/`](backend), entende a frase,
+  guarda a tarefa, decide quando lembrar — é o mesmo código (já testado)
+  que também roda no [app desktop](../AssistentePessoal) original.
+
+Você só roda **um comando** (`npm start`) — ele sobe o backend Java
+automaticamente por baixo dos panos, sem você precisar abrir dois
+terminais:
 
 ```
-Você (WhatsApp) ──▶ Bot Node.js ──HTTP──▶ Backend Java ──▶ SQLite
-                     (Baileys)     (localhost:8080)      (data/assistente.db)
+Você (WhatsApp) ──▶ Bot Node.js ──HTTP local──▶ Backend Java ──▶ SQLite
+                     (Baileys)      (127.0.0.1:8080)          (backend/data/assistente.db)
 ```
 
-- **Sem WhatsApp Business API, sem Twilio, sem Selenium.** Usa o Baileys,
-  biblioteca open source e gratuita que fala o mesmo protocolo do WhatsApp
-  Web.
 - Você **escaneia um QR code uma única vez**, exatamente como ao abrir o
   WhatsApp Web no navegador — o bot passa a ser "mais um aparelho conectado"
   na sua própria conta.
 - Toda a lógica roda **no seu PC**, sem servidor externo, sem nuvem — os
-  dois processos (bot e backend) falam só entre si em `localhost`.
+  dois processos só falam entre si em `localhost`, nada sai da sua máquina.
 - O bot só reage a mensagens no chat **"Mensagem para você mesmo"** — a
   conversa que você tem consigo mesmo no WhatsApp. Mensagens em outros chats
   são ignoradas.
@@ -66,66 +66,61 @@ Você (WhatsApp) ──▶ Bot Node.js ──HTTP──▶ Backend Java ──�
 
 ## Requisitos
 
-- **Node.js 20 ou mais recente**. Baixe em https://nodejs.org — gratuito.
-- **[AssistentePessoal-Backend](../AssistentePessoal-Backend) rodando**
-  (requer Java 21+ e Maven — veja o README de lá).
-- Um número de WhatsApp ativo no seu celular (o mesmo que você já usa).
+- **Node.js 20+** — https://nodejs.org (gratuito)
+- **Java 21+** — https://adoptium.net (gratuito)
+- **Maven 3.9+** — https://maven.apache.org (gratuito)
+- Um número de WhatsApp ativo no seu celular (o mesmo que você já usa)
 - Conexão com a internet (o WhatsApp em si exige internet; "gratuito" aqui
-  significa sem custo financeiro, não sem internet).
+  significa sem custo financeiro, não sem internet)
 
 ## Instalação
 
 ```bash
 cd AssistenteWhatsapp
 npm install
+npm run build:backend
 ```
 
-Isso baixa apenas bibliotecas gratuitas e de código aberto: Baileys (conexão
-WhatsApp), pino (log interno do Baileys) e qrcode-terminal (mostrar o QR no
-terminal). Nenhum banco de dados aqui — o bot não guarda nada localmente,
-só conversa com o backend Java.
+O `npm run build:backend` compila o backend Java uma vez (gera
+`backend/target/assistente-backend-1.0.0.jar`) — só precisa rodar de novo
+se você alterar o código do backend.
 
 ## Como rodar
 
-**1. Primeiro, suba o backend** (em outro terminal):
-```bash
-cd ../AssistentePessoal-Backend
-mvn spring-boot:run
-```
-
-**2. Depois, suba o bot:**
 ```bash
 npm start
 ```
 
-Na primeira vez, um QR code aparece no terminal. No celular:
-**WhatsApp → Configurações (⋮ ou ⚙) → Aparelhos conectados → Conectar
-aparelho** → aponte a câmera para o QR do terminal.
+Isso:
+1. Sobe o backend Java automaticamente (se ainda não estiver rodando)
+2. Conecta no WhatsApp e mostra um QR code no terminal (na primeira vez)
+3. Fica ouvindo mensagens e disparando lembretes
+
+No celular: **WhatsApp → Configurações (⋮ ou ⚙) → Aparelhos conectados →
+Conectar aparelho** → aponte a câmera para o QR do terminal.
 
 Depois de conectado, abra a conversa **"Mensagem para você mesmo"** no
 WhatsApp (ícone do seu próprio perfil no topo da lista de chats, ou pesquise
 seu próprio nome) e comece a escrever.
 
-A sessão fica salva em `auth/` — nas próximas vezes que rodar `npm start`,
-não precisa escanear o QR de novo (a menos que desconecte o aparelho pelo
-celular ou apague a pasta `auth/`).
+A sessão do WhatsApp fica salva em `auth/` — nas próximas vezes que rodar
+`npm start`, não precisa escanear o QR de novo (a menos que desconecte o
+aparelho pelo celular ou apague a pasta `auth/`).
 
-**Para os lembretes funcionarem, os dois processos (bot e backend) precisam
-continuar rodando** — deixe os terminais abertos, ou rode como processos em
-segundo plano (veja abaixo).
+**Para os lembretes funcionarem, o processo precisa continuar rodando** —
+deixe o terminal aberto, ou rode como um processo em segundo plano (veja
+abaixo). Ao encerrar com `Ctrl+C`, o backend Java é encerrado junto
+automaticamente.
 
 ### Rodar em segundo plano (Windows)
 
-Com o [PM2](https://pm2.keymetrics.io/) (gratuito), para o bot:
+Com o [PM2](https://pm2.keymetrics.io/) (gratuito):
 ```bash
 npm install -g pm2
 pm2 start src/index.js --name assistente-whatsapp
 pm2 save
 pm2 startup
 ```
-
-O backend Java pode rodar como serviço com [WinSW](https://github.com/winsw/winsw)
-ou, mais simples, numa janela do PowerShell minimizada com `mvn spring-boot:run`.
 
 ## Comandos no chat
 
@@ -155,42 +150,46 @@ minutos até eu concluir`, `prioridade alta`, etc. — veja exemplos digitando
 Quando um lembrete chega, responder só **1**, **2** ou **3** já
 concluir/adia 30 min/cancela a tarefa daquele lembrete.
 
-Todos esses comandos são interpretados **pelo backend Java** — este bot só
-repassa o texto e devolve a resposta.
-
 ## Estrutura do projeto
 
 ```
 AssistenteWhatsapp/
 ├── package.json
-├── config.json                # criado automaticamente (URL do backend)
-├── auth/                       # credenciais da sessão do WhatsApp (NUNCA versionar)
+├── config.json                  # criado automaticamente (URL do backend)
+├── CLAUDE.md
+├── auth/                        # credenciais da sessão do WhatsApp (NUNCA versionar)
 ├── src/
-│   ├── index.js                 # ponto de entrada
+│   ├── index.js                   # ponto de entrada
 │   ├── config.js
 │   ├── services/
-│   │   └── apiClient.js         # cliente HTTP para o backend Java
+│   │   ├── apiClient.js           # cliente HTTP para o backend Java
+│   │   └── backendLauncher.js     # sobe o backend Java automaticamente
 │   └── bot/
-│       ├── whatsappClient.js    # conexão Baileys, QR code, envio de mensagens, polling de lembretes
-│       └── commandHandler.js    # repassa mensagens para o backend e traduz a resposta
-└── test/                        # testes (node --test)
+│       ├── whatsappClient.js      # conexão Baileys, QR code, polling de lembretes
+│       └── commandHandler.js      # repassa mensagens para o backend e traduz a resposta
+├── test/                          # testes do bot (node --test)
+└── backend/                       # backend Java (Spring Boot) — ver backend/README.md
+    ├── pom.xml
+    ├── src/main/java/com/assistente/...
+    └── src/test/java/...
 ```
-
-Note que não há mais `db/`, `parser/` nem a maior parte de `services/` — essa
-lógica mudou para o [AssistentePessoal-Backend](../AssistentePessoal-Backend).
 
 ## Testes
 
+**Bot (Node.js):**
 ```bash
 npm test
 ```
+`ApiClient`, `CommandHandler` e `backendLauncher` — 14 testes com
+`node:test`, sem dependências extras.
 
-Roda os testes com o executor nativo do Node (`node:test` — sem
-dependências extras): o `ApiClient` (chamadas HTTP, com `fetch` mockado) e o
-`CommandHandler` (repassa corretamente texto/activeReminderId e trata a
-resposta do backend, incluindo o caso de backup). A lógica de negócio em si
-(parser, regras de tarefas, agendador) tem sua própria suíte de testes no
-backend Java (`mvn test` lá, 78 testes).
+**Backend (Java):**
+```bash
+cd backend && mvn test
+```
+78 testes (JUnit 5 + Mockito): parser de linguagem natural, regras de
+negócio, repositório SQLite (integração real) e os comandos do bot. Veja
+[backend/README.md](backend/README.md) para detalhes da API REST.
 
 ## Backup
 
@@ -206,13 +205,17 @@ envia de volta pelo próprio WhatsApp, como documento anexado.
   "backendUrl": "http://localhost:8080"
 }
 ```
-Só precisa mudar se você rodar o backend Java em outra porta/máquina.
+Só precisa mudar se você rodar o backend Java em outra porta.
 
 ## Solução de problemas
 
-**"Não consegui falar com o backend agora"**
-O [AssistentePessoal-Backend](../AssistentePessoal-Backend) não está
-rodando. Suba-o com `mvn spring-boot:run` antes de usar o bot.
+**"Backend Java ainda não foi compilado"**
+Rode `npm run build:backend` (precisa de Java 21+ e Maven instalados).
+
+**"Backend Java não respondeu a tempo (45s)"**
+Confira os logs impressos no terminal — geralmente é porta 8080 já em uso
+por outro processo, ou erro de compilação. Veja
+[backend/README.md](backend/README.md#solução-de-problemas).
 
 **O QR code não aparece / expira antes de escanear**
 Reinicie `npm start` para gerar um novo QR.
@@ -228,7 +231,6 @@ nunca responder a ninguém além de você.
 
 ## Custo
 
-**R$ 0,00.** Node.js, Java, Maven, Baileys, Spring Boot, pino,
-qrcode-terminal e o driver SQLite são todos gratuitos e de código aberto.
-Não é usada nenhuma API paga do WhatsApp, nenhum servidor em nuvem, nenhum
-cartão de crédito.
+**R$ 0,00.** Node.js, Java, Maven, Baileys, Spring Boot e o driver SQLite
+são todos gratuitos e de código aberto. Não é usada nenhuma API paga do
+WhatsApp, nenhum servidor em nuvem, nenhum cartão de crédito.
