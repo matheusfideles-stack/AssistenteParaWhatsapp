@@ -6,16 +6,16 @@ nenhuma API paga.
 
 ```
 Você: Hoje às 19h estudar Java
-Bot:  ✅ Tarefa criada!
-      📌 Estudar Java
-      📅 Hoje (2026-09-27)
-      ⏰ 19:00
+Bot:   Tarefa criada!
+       Estudar Java
+       Hoje (2026-09-27)
+       19:00
       #1
 
 (às 19h)
-Bot:  🔔 LEMBRETE
+Bot:   LEMBRETE
       Está na hora de: *Estudar Java*
-      ⏰ 19:00
+       19:00
 
       Responda:
       1️⃣ Concluir
@@ -23,7 +23,7 @@ Bot:  🔔 LEMBRETE
       3️⃣ Cancelar
 
 Você: 1
-Bot:  ✅ Tarefa concluída!
+Bot:   Tarefa concluída!
       Estudar Java
 ```
 
@@ -234,8 +234,4 @@ Confirme que está escrevendo no chat **"Mensagem para você mesmo"** — o bot
 ignora mensagens em qualquer outro chat/contato/grupo, de propósito, para
 nunca responder a ninguém além de você.
 
-## Custo
 
-**R$ 0,00.** Node.js, Java, Maven, Baileys, Spring Boot e o driver SQLite
-são todos gratuitos e de código aberto. Não é usada nenhuma API paga do
-WhatsApp, nenhum servidor em nuvem, nenhum cartão de crédito.
