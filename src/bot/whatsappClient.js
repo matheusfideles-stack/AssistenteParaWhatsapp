@@ -51,8 +51,8 @@ export function createWhatsAppBot({ commandHandler, apiClient }) {
             const { connection, lastDisconnect, qr } = update;
 
             if (qr) {
-                console.log('\n📱 Escaneie o QR code abaixo no WhatsApp do seu celular');
-                console.log('   (Configurações → Aparelhos conectados → Conectar aparelho):\n');
+                console.log('\nEscaneie o QR code abaixo no WhatsApp do seu celular');
+                console.log('   (Configurações -> Aparelhos conectados -> Conectar aparelho):\n');
                 qrcode.generate(qr, { small: true });
             }
 
@@ -63,7 +63,7 @@ export function createWhatsAppBot({ commandHandler, apiClient }) {
                 // identificador de privacidade mais recente (@lid) - sem checar os
                 // dois, o bot nao reconhece o proprio chat e ignora as mensagens.
                 ownLid = sock.user.lid ? jidNormalizedUser(sock.user.lid) : null;
-                console.log('✅ Conectado ao WhatsApp!');
+                console.log('Conectado ao WhatsApp!');
                 console.log(`   Escreva no chat "Mensagem para você mesmo" para criar tarefas.\n`);
                 startReminderPolling();
             }
@@ -72,7 +72,7 @@ export function createWhatsAppBot({ commandHandler, apiClient }) {
                 stopReminderPolling();
                 const statusCode = new Boom(lastDisconnect?.error)?.output?.statusCode;
                 const shouldReconnect = statusCode !== DisconnectReason.loggedOut;
-                console.log('⚠️  Conexão encerrada.', shouldReconnect ? 'Reconectando...' : 'Sessão desconectada.');
+                console.log('Conexão encerrada.', shouldReconnect ? 'Reconectando...' : 'Sessão desconectada.');
                 if (shouldReconnect) {
                     start();
                 } else {
@@ -104,7 +104,7 @@ export function createWhatsAppBot({ commandHandler, apiClient }) {
         } catch (err) {
             console.error('[WhatsApp] Erro ao falar com o backend:', err.message);
             await sock.sendMessage(ownJid, {
-                text: '⚠️ Não consegui falar com o backend agora. Confirme se ele está rodando (AssistentePessoal-Backend) e tente de novo.',
+                text: 'Não consegui falar com o backend agora. Confirme se ele está rodando (AssistentePessoal-Backend) e tente de novo.',
             });
             return;
         }

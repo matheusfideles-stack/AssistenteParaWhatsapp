@@ -6,24 +6,21 @@ nenhuma API paga.
 
 ```
 Você: Hoje às 19h estudar Java
-Bot:   Tarefa criada!
-       Estudar Java
-       Hoje (2026-09-27)
-       19:00
+Bot:  Tarefa criada!
+      Estudar Java
+      Hoje (2026-09-27)
+      19:00
       #1
 
 (às 19h)
-Bot:   LEMBRETE
+Bot:  LEMBRETE
       Está na hora de: *Estudar Java*
-       19:00
+      19:00
 
-      Responda:
-      1️⃣ Concluir
-      2️⃣ Adiar 30 min
-      3️⃣ Cancelar
+      Responda: 1 Concluir | 2 Adiar 30 min | 3 Cancelar
 
 Você: 1
-Bot:   Tarefa concluída!
+Bot:  Tarefa concluída!
       Estudar Java
 ```
 
@@ -45,8 +42,8 @@ automaticamente por baixo dos panos, sem você precisar abrir dois
 terminais:
 
 ```
-Você (WhatsApp) ──▶ Bot Node.js ──HTTP local──▶ Backend Java ──▶ SQLite
-                     (Baileys)      (127.0.0.1:8080)          (backend/data/assistente.db)
+Você (WhatsApp) -> Bot Node.js -> HTTP local -> Backend Java -> SQLite
+                    (Baileys)      (127.0.0.1:8080)  (backend/data/assistente.db)
 ```
 
 - Você **escaneia um QR code uma única vez**, exatamente como ao abrir o
@@ -96,8 +93,8 @@ Isso:
 2. Conecta no WhatsApp e mostra um QR code no terminal (na primeira vez)
 3. Fica ouvindo mensagens e disparando lembretes
 
-No celular: **WhatsApp → Configurações (⋮ ou ⚙) → Aparelhos conectados →
-Conectar aparelho** → aponte a câmera para o QR do terminal.
+No celular: **WhatsApp > Configurações > Aparelhos conectados > Conectar
+aparelho** > aponte a câmera para o QR do terminal.
 
 Depois de conectado, abra a conversa **"Mensagem para você mesmo"** no
 WhatsApp (ícone do seu próprio perfil no topo da lista de chats, ou pesquise
@@ -192,7 +189,7 @@ testes com `node:test`, sem dependências extras.
 ```bash
 cd backend && mvn test
 ```
-78 testes (JUnit 5 + Mockito): parser de linguagem natural, regras de
+84 testes (JUnit 5 + Mockito): parser de linguagem natural, regras de
 negócio, repositório SQLite (integração real) e os comandos do bot. Veja
 [backend/README.md](backend/README.md) para detalhes da API REST.
 
@@ -233,5 +230,3 @@ pasta `auth/` e rode `npm start` de novo para reconectar com um novo QR.
 Confirme que está escrevendo no chat **"Mensagem para você mesmo"** — o bot
 ignora mensagens em qualquer outro chat/contato/grupo, de propósito, para
 nunca responder a ninguém além de você.
-
-

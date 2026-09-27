@@ -25,7 +25,7 @@ public class CommandHandler {
     private static final DateTimeFormatter TIME_FMT = DateTimeFormatter.ofPattern("HH:mm");
 
     private static final String HELP_TEXT = """
-            🤖 *Assistente Pessoal - comandos*
+            *Assistente Pessoal - comandos*
 
             Para criar uma tarefa, é só escrever normalmente, por exemplo:
             _Hoje às 19h estudar Java_
@@ -34,26 +34,26 @@ public class CommandHandler {
             _Beber água a cada 30 minutos até eu concluir_
 
             *Consultar:*
-            📋 tarefas / hoje — tarefas de hoje
-            📅 amanhã — tarefas de amanhã
-            📋 todas — todas as tarefas
-            ⏳ pendentes
-            ✅ concluidas
-            ⚠️ atrasadas
-            ⏭️ proximas — próximas 24h
-            🔴 prioridade — alta prioridade
-            🔍 buscar <termo>
+            tarefas / hoje — tarefas de hoje
+            amanhã — tarefas de amanhã
+            todas — todas as tarefas
+            pendentes
+            concluidas
+            atrasadas
+            proximas — próximas 24h
+            prioridade — alta prioridade
+            buscar <termo>
 
             *Ações* (use o número #id que aparece na lista):
-            ✅ concluir <id>
-            ❌ cancelar <id>
-            🗑️ excluir <id>
-            ⏰ adiar <id> <minutos>
-            📅 reagendar <id> <dd/mm[/aaaa]> <hh:mm>
+            concluir <id>
+            cancelar <id>
+            excluir <id>
+            adiar <id> <minutos>
+            reagendar <id> <dd/mm[/aaaa]> <hh:mm>
 
             *Outros:*
-            💾 backup — exporta suas tarefas em .csv
-            ❓ ajuda — mostra esta mensagem
+            backup — exporta suas tarefas em .csv
+            ajuda — mostra esta mensagem
 
             Quando um lembrete chegar, responda *1* (ou "concluir"), *2* (ou "adiar") ou *3* (ou "cancelar").""";
 
@@ -95,28 +95,28 @@ public class CommandHandler {
             return CommandResult.of(HELP_TEXT);
         }
         if (lower.equals("tarefas") || lower.equals("hoje")) {
-            return CommandResult.of(listTasks(taskService.findToday(), "📅 TAREFAS DE HOJE"));
+            return CommandResult.of(listTasks(taskService.findToday(), "TAREFAS DE HOJE"));
         }
         if (lower.equals("amanha") || lower.equals("amanhã")) {
-            return CommandResult.of(listTasks(taskService.findTomorrow(), "📅 TAREFAS DE AMANHÃ"));
+            return CommandResult.of(listTasks(taskService.findTomorrow(), "TAREFAS DE AMANHÃ"));
         }
         if (lower.equals("todas")) {
-            return CommandResult.of(listTasks(taskService.findAll(), "📋 TODAS AS TAREFAS"));
+            return CommandResult.of(listTasks(taskService.findAll(), "TODAS AS TAREFAS"));
         }
         if (lower.equals("pendentes")) {
-            return CommandResult.of(listTasks(taskService.findPending(), "⏳ TAREFAS PENDENTES"));
+            return CommandResult.of(listTasks(taskService.findPending(), "TAREFAS PENDENTES"));
         }
         if (lower.equals("concluidas") || lower.equals("concluídas")) {
-            return CommandResult.of(listTasks(taskService.findCompleted(), "✅ TAREFAS CONCLUÍDAS"));
+            return CommandResult.of(listTasks(taskService.findCompleted(), "TAREFAS CONCLUÍDAS"));
         }
         if (lower.equals("atrasadas")) {
-            return CommandResult.of(listTasks(taskService.findOverdue(), "⚠️ TAREFAS ATRASADAS"));
+            return CommandResult.of(listTasks(taskService.findOverdue(), "TAREFAS ATRASADAS"));
         }
         if (lower.equals("proximas") || lower.equals("próximas")) {
-            return CommandResult.of(listTasks(taskService.findUpcoming(24), "⏭️ PRÓXIMAS 24H"));
+            return CommandResult.of(listTasks(taskService.findUpcoming(24), "PRÓXIMAS 24H"));
         }
         if (lower.equals("prioridade") || lower.equals("urgentes") || lower.equals("prioridades")) {
-            return CommandResult.of(listTasks(taskService.findHighPriority(), "🔴 ALTA PRIORIDADE"));
+            return CommandResult.of(listTasks(taskService.findHighPriority(), "ALTA PRIORIDADE"));
         }
         if (lower.equals("backup")) {
             return exportBackup();
@@ -124,7 +124,7 @@ public class CommandHandler {
 
         Matcher m;
         if ((m = P_BUSCAR.matcher(text)).matches()) {
-            return CommandResult.of(listTasks(taskService.search(m.group(2)), "🔍 RESULTADOS PARA \"" + m.group(2) + "\""));
+            return CommandResult.of(listTasks(taskService.search(m.group(2)), "RESULTADOS PARA \"" + m.group(2) + "\""));
         }
         if ((m = P_CONCLUIR.matcher(text)).matches()) {
             return complete(Long.parseLong(m.group(1)));
@@ -164,17 +164,17 @@ public class CommandHandler {
         try {
             if (digit.equals("1")) {
                 Task task = taskService.complete(taskId);
-                return CommandResult.clearingReminder("✅ *Tarefa concluída!*\n" + task.getTitle());
+                return CommandResult.clearingReminder("*Tarefa concluída!*\n" + task.getTitle());
             }
             if (digit.equals("2")) {
                 Task task = taskService.postpone(taskId, 30);
                 return CommandResult.clearingReminder(
-                        "⏰ Tudo bem. Vou te lembrar novamente às *" + formatTime(task.getDueTime()) + "*.");
+                        "Tudo bem. Vou te lembrar novamente às *" + formatTime(task.getDueTime()) + "*.");
             }
             Task task = taskService.cancel(taskId);
-            return CommandResult.clearingReminder("❌ Tarefa cancelada: " + task.getTitle());
+            return CommandResult.clearingReminder("Tarefa cancelada: " + task.getTitle());
         } catch (RuntimeException e) {
-            return CommandResult.clearingReminder("⚠️ " + e.getMessage());
+            return CommandResult.clearingReminder(e.getMessage());
         }
     }
 
@@ -184,34 +184,34 @@ public class CommandHandler {
             String data = task.getDueDate() == null ? "" : DateTimeUtil.friendlyDate(task.getDueDate());
             String hora = formatTime(task.getDueTime());
             StringBuilder msg = new StringBuilder()
-                    .append("✅ *Tarefa criada!*\n📌 ").append(task.getTitle())
-                    .append("\n📅 ").append(data).append(" (").append(task.getDueDate()).append(")")
-                    .append("\n⏰ ").append(hora)
+                    .append("*Tarefa criada!*\n").append(task.getTitle())
+                    .append("\n").append(data).append(" (").append(task.getDueDate()).append(")")
+                    .append("\n").append(hora)
                     .append("\n#").append(task.getId());
             if (task.isRecurring()) {
-                msg.append("\n🔁 Recorrente (").append(recurrenceLabel(task)).append(")");
+                msg.append("\nRecorrente (").append(recurrenceLabel(task)).append(")");
             }
             return CommandResult.of(msg.toString());
         } catch (RuntimeException e) {
-            return CommandResult.of("⚠️ Não consegui entender: " + e.getMessage() + "\n\nDigite *ajuda* para ver exemplos.");
+            return CommandResult.of("Não consegui entender: " + e.getMessage() + "\n\nDigite *ajuda* para ver exemplos.");
         }
     }
 
     private CommandResult complete(long id) {
         try {
             Task task = taskService.complete(id);
-            return CommandResult.of("✅ *Tarefa concluída!*\n" + task.getTitle());
+            return CommandResult.of("*Tarefa concluída!*\n" + task.getTitle());
         } catch (RuntimeException e) {
-            return CommandResult.of("⚠️ " + e.getMessage());
+            return CommandResult.of(e.getMessage());
         }
     }
 
     private CommandResult cancel(long id) {
         try {
             Task task = taskService.cancel(id);
-            return CommandResult.of("❌ Tarefa cancelada: " + task.getTitle());
+            return CommandResult.of("Tarefa cancelada: " + task.getTitle());
         } catch (RuntimeException e) {
-            return CommandResult.of("⚠️ " + e.getMessage());
+            return CommandResult.of(e.getMessage());
         }
     }
 
@@ -219,19 +219,19 @@ public class CommandHandler {
         try {
             Task task = taskService.get(id);
             taskService.deleteTask(id);
-            return CommandResult.of("🗑️ Tarefa excluída: " + task.getTitle());
+            return CommandResult.of("Tarefa excluída: " + task.getTitle());
         } catch (RuntimeException e) {
-            return CommandResult.of("⚠️ " + e.getMessage());
+            return CommandResult.of(e.getMessage());
         }
     }
 
     private CommandResult postpone(long id, int minutes) {
         try {
             Task task = taskService.postpone(id, minutes);
-            return CommandResult.of("⏰ *" + task.getTitle() + "* adiada para "
+            return CommandResult.of("*" + task.getTitle() + "* adiada para "
                     + DateTimeUtil.friendlyDate(task.getDueDate()) + " às " + formatTime(task.getDueTime()) + ".");
         } catch (RuntimeException e) {
-            return CommandResult.of("⚠️ " + e.getMessage());
+            return CommandResult.of(e.getMessage());
         }
     }
 
@@ -240,16 +240,16 @@ public class CommandHandler {
             LocalDate date = parseBrDate(dateText);
             LocalTime time = LocalTime.parse(timeText);
             Task task = taskService.reschedule(id, date, time);
-            return CommandResult.of("📅 *" + task.getTitle() + "* reagendada para "
+            return CommandResult.of("*" + task.getTitle() + "* reagendada para "
                     + DateTimeUtil.friendlyDate(task.getDueDate()) + " às " + formatTime(task.getDueTime()) + ".");
         } catch (RuntimeException e) {
-            return CommandResult.of("⚠️ " + e.getMessage());
+            return CommandResult.of(e.getMessage());
         }
     }
 
     private CommandResult exportBackup() {
         Path file = backupService.exportBackup(backupDirectory);
-        return CommandResult.withFile("💾 Backup exportado! Enviando o arquivo...", file);
+        return CommandResult.withFile("Backup exportado! Enviando o arquivo...", file);
     }
 
     private String listTasks(List<Task> tasks, String title) {
@@ -259,19 +259,19 @@ public class CommandHandler {
         StringBuilder sb = new StringBuilder(title).append("\n\n");
         for (Task t : tasks) {
             String time = formatTime(t.getDueTime());
-            String emoji = switch (t.getPriority()) {
-                case HIGH -> "🔴";
-                case MEDIUM -> "🟡";
-                case LOW -> "⚪";
+            String priority = switch (t.getPriority()) {
+                case HIGH -> " (alta)";
+                case MEDIUM -> "";
+                case LOW -> " (baixa)";
             };
-            String rec = t.isRecurring() ? " 🔁" : "";
-            String statusIcon = switch (t.getStatus()) {
-                case COMPLETED -> "✅";
-                case CANCELLED -> "❌";
-                default -> "⏰";
+            String rec = t.isRecurring() ? " (recorrente)" : "";
+            String status = switch (t.getStatus()) {
+                case COMPLETED -> "[concluída] ";
+                case CANCELLED -> "[cancelada] ";
+                default -> "";
             };
-            sb.append(statusIcon).append(" #").append(t.getId()).append(" ").append(time)
-                    .append(" ").append(emoji).append(" ").append(t.getTitle()).append(rec).append("\n");
+            sb.append(status).append("#").append(t.getId()).append(" ").append(time)
+                    .append(" ").append(t.getTitle()).append(priority).append(rec).append("\n");
         }
         sb.append("\nTotal: ").append(tasks.size());
         return sb.toString();

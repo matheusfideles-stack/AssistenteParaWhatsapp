@@ -19,7 +19,7 @@ const POLL_INTERVAL_MS = 1_000;
  */
 export async function ensureBackendRunning(apiClient, backendUrl) {
     if (await isBackendUp(apiClient)) {
-        console.log(`✅ Backend já estava rodando em ${backendUrl}`);
+        console.log(`Backend já estava rodando em ${backendUrl}`);
         return null;
     }
 
@@ -31,7 +31,7 @@ export async function ensureBackendRunning(apiClient, backendUrl) {
         );
     }
 
-    console.log('🚀 Iniciando o backend Java automaticamente...');
+    console.log('Iniciando o backend Java automaticamente...');
     const child = spawn('java', ['-jar', jarPath], {
         cwd: BACKEND_DIR,
         stdio: ['ignore', 'pipe', 'pipe'],
@@ -51,7 +51,7 @@ export async function ensureBackendRunning(apiClient, backendUrl) {
     });
 
     await waitUntilReady(apiClient, child);
-    console.log(`✅ Backend Java pronto em ${backendUrl}`);
+    console.log(`Backend Java pronto em ${backendUrl}`);
     return child;
 }
 

@@ -102,7 +102,7 @@ class CommandHandlerTest {
     @Test
     void concluirIdInexistenteRetornaErroAmigavel() {
         CommandResult result = handler.handle("concluir #999", null);
-        assertTrue(result.text().contains("⚠️"));
+        assertTrue(result.text().contains("nao encontrada"));
     }
 
     @Test

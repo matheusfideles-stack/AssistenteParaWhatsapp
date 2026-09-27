@@ -41,7 +41,7 @@ public class MessageController {
             return new MessageResponse(result.text(), result.clearActiveReminder(),
                     result.filePath().getFileName().toString(), base64);
         } catch (IOException e) {
-            return MessageResponse.text("⚠️ Backup gerado, mas houve erro ao ler o arquivo: " + e.getMessage(),
+            return MessageResponse.text("Backup gerado, mas houve erro ao ler o arquivo: " + e.getMessage(),
                     result.clearActiveReminder());
         }
     }

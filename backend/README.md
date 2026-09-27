@@ -22,8 +22,8 @@ seu PC.
   responder.
 
 ```
-Você (WhatsApp) ──▶ Bot Node.js ──HTTP──▶ Backend Java ──▶ SQLite
-                     (Baileys)     (localhost:8080)      (data/assistente.db)
+Você (WhatsApp) -> Bot Node.js -> HTTP -> Backend Java -> SQLite
+                    (Baileys)     (localhost:8080)  (data/assistente.db)
 ```
 
 ## Rodando o backend sozinho (para desenvolvimento)
@@ -43,7 +43,7 @@ cd backend
 mvn test
 ```
 
-78 testes (JUnit 5 + Mockito): parser de linguagem natural, regras de
+84 testes (JUnit 5 + Mockito): parser de linguagem natural, regras de
 negócio, repositório SQLite (integração real, com arquivo temporário),
 agendador de lembretes e os comandos do bot (`CommandHandlerTest`).
 
@@ -61,7 +61,7 @@ formatada (mesmo texto que aparece no chat).
 
 // Response
 {
-  "text": "✅ *Tarefa criada!*\n📌 Estudar Java\n📅 Hoje (2026-09-27)\n⏰ 19:00\n#1",
+  "text": "*Tarefa criada!*\nEstudar Java\nHoje (2026-09-27)\n19:00\n#1",
   "clearActiveReminder": false,
   "backupFileName": null,
   "backupFileBase64": null
@@ -78,7 +78,7 @@ na próxima consulta.
 
 ```json
 [
-  { "taskId": 1, "text": "🔔 *LEMBRETE*\nEstá na hora de: *Estudar Java*..." }
+  { "taskId": 1, "text": "*LEMBRETE*\nEstá na hora de: *Estudar Java*..." }
 ]
 ```
 

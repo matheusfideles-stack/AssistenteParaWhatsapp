@@ -43,12 +43,12 @@ public class ReminderQueueService {
 
     private void onReminder(Task task, boolean overdue) {
         String time = task.getDueTime() == null ? "--:--" : task.getDueTime().format(TIME_FMT);
-        String header = overdue ? "⚠️ *TAREFA ATRASADA*" : "🔔 *LEMBRETE*";
+        String header = overdue ? "*TAREFA ATRASADA*" : "*LEMBRETE*";
         String body = overdue
-                ? "Você ainda não concluiu: *" + task.getTitle() + "*\n⏰ Horário: " + time
-                : "Está na hora de: *" + task.getTitle() + "*\n⏰ " + time;
+                ? "Você ainda não concluiu: *" + task.getTitle() + "*\nHorário: " + time
+                : "Está na hora de: *" + task.getTitle() + "*\n" + time;
         String text = header + "\n" + body
-                + "\n\nResponda: 1️⃣ Concluir | 2️⃣ Adiar 30min | 3️⃣ Cancelar";
+                + "\n\nResponda: 1 Concluir | 2 Adiar 30min | 3 Cancelar";
         pending.add(new ReminderMessage(task.getId(), text));
     }
 

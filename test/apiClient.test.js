@@ -56,7 +56,7 @@ describe('ApiClient', () => {
     });
 
     it('fetchPendingReminders faz GET em /api/reminders/pending', async () => {
-        stubFetch([{ taskId: 1, text: '🔔 LEMBRETE' }]);
+        stubFetch([{ taskId: 1, text: 'LEMBRETE' }]);
         const client = new ApiClient('http://localhost:8080/');
 
         const reminders = await client.fetchPendingReminders();

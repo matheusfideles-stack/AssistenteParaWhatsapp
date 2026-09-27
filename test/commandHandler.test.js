@@ -39,19 +39,19 @@ describe('CommandHandler (proxy para o backend Java)', () => {
     });
 
     it('devolve o texto e clearActiveReminder da resposta do backend', async () => {
-        const api = fakeApiClient({ text: '✅ Tarefa concluída!', clearActiveReminder: true });
+        const api = fakeApiClient({ text: 'Tarefa concluída!', clearActiveReminder: true });
         const handler = new CommandHandler(api);
 
         const result = await handler.handle('1', { activeReminderId: 7 });
 
-        assert.equal(result.text, '✅ Tarefa concluída!');
+        assert.equal(result.text, 'Tarefa concluída!');
         assert.equal(result.clearActiveReminder, true);
         assert.equal(result.filePath, undefined);
     });
 
     it('quando o backend manda um backup, salva o arquivo e inclui filePath', async () => {
         const api = fakeApiClient({
-            text: '💾 Backup exportado!',
+            text: 'Backup exportado!',
             clearActiveReminder: false,
             backupFileName: 'backup-2026-09-27.csv',
             backupFileBase64: 'aWQsdGl0dWxv',
