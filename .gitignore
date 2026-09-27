@@ -1,0 +1,12 @@
+node_modules/
+auth/
+data/
+*.db
+*.db-shm
+*.db-wal
+config.json
+.DS_Store
+*.log
+backup-*.csv
+.idea/
+.vscode/

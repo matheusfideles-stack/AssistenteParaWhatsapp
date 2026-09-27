@@ -1,0 +1,22 @@
+{
+  "name": "assistente-whatsapp",
+  "version": "1.0.0",
+  "description": "Bot pessoal de tarefas e lembretes no WhatsApp - 100% local e gratuito, sem API paga.",
+  "type": "module",
+  "main": "src/index.js",
+  "scripts": {
+    "start": "node src/index.js",
+    "test": "node --test"
+  },
+  "license": "MIT",
+  "engines": {
+    "node": ">=22.5.0"
+  },
+  "dependencies": {
+    "@hapi/boom": "^10.0.1",
+    "@whiskeysockets/baileys": "^6.7.9",
+    "dayjs": "^1.11.13",
+    "pino": "^9.5.0",
+    "qrcode-terminal": "^0.12.0"
+  }
+}
