@@ -9,10 +9,9 @@ import {
 import { Boom } from '@hapi/boom';
 import pino from 'pino';
 import qrcode from 'qrcode-terminal';
-import { CommandHandler } from './commandHandler.js';
-import { formatTime } from '../utils/dateUtil.js';
 
 const AUTH_DIR = path.resolve(process.cwd(), 'auth');
+const REMINDER_POLL_INTERVAL_MS = 15_000;
 const logger = pino({ level: 'silent' });
 
 /**
@@ -23,14 +22,16 @@ const logger = pino({ level: 'silent' });
  * equivalente a estar logado no seu WhatsApp).
  *
  * O bot funciona no chat "Mensagem para voce mesmo" (voce falando com voce):
- * o que voce escrever la vira comando/tarefa, e os lembretes chegam la.
+ * o que voce escrever la vira comando/tarefa, e os lembretes chegam la. Toda
+ * a logica de tarefas mora no backend Java - este modulo so envia/recebe
+ * mensagens e repassa para o CommandHandler (que fala HTTP com o backend).
  */
-export function createWhatsAppBot({ taskService, backupService, reminderScheduler }) {
-    const commandHandler = new CommandHandler(taskService, backupService);
+export function createWhatsAppBot({ commandHandler, apiClient }) {
     let sock = null;
     let ownJid = null;
     let ownLid = null;
     let activeReminderId = null;
+    let pollTimer = null;
 
     async function start() {
         fs.mkdirSync(AUTH_DIR, { recursive: true });
@@ -63,9 +64,11 @@ export function createWhatsAppBot({ taskService, backupService, reminderSchedule
                 ownLid = sock.user.lid ? jidNormalizedUser(sock.user.lid) : null;
                 console.log('✅ Conectado ao WhatsApp!');
                 console.log(`   Escreva no chat "Mensagem para você mesmo" para criar tarefas.\n`);
+                startReminderPolling();
             }
 
             if (connection === 'close') {
+                stopReminderPolling();
                 const statusCode = new Boom(lastDisconnect?.error)?.output?.statusCode;
                 const shouldReconnect = statusCode !== DisconnectReason.loggedOut;
                 console.log('⚠️  Conexão encerrada.', shouldReconnect ? 'Reconectando...' : 'Sessão desconectada.');
@@ -83,11 +86,6 @@ export function createWhatsAppBot({ taskService, backupService, reminderSchedule
                 await handleIncoming(msg);
             }
         });
-
-        reminderScheduler.setListener((task, overdue) => {
-            sendReminder(task, overdue).catch((err) =>
-                console.error('[WhatsApp] Erro ao enviar lembrete:', err.message));
-        });
     }
 
     async function handleIncoming(msg) {
@@ -99,7 +97,17 @@ export function createWhatsAppBot({ taskService, backupService, reminderSchedule
         const text = extractText(msg.message);
         if (!text) return;
 
-        const result = commandHandler.handle(text, { activeReminderId });
+        let result;
+        try {
+            result = await commandHandler.handle(text, { activeReminderId });
+        } catch (err) {
+            console.error('[WhatsApp] Erro ao falar com o backend:', err.message);
+            await sock.sendMessage(ownJid, {
+                text: '⚠️ Não consegui falar com o backend agora. Confirme se ele está rodando (AssistentePessoal-Backend) e tente de novo.',
+            });
+            return;
+        }
+
         if (result.clearActiveReminder) {
             activeReminderId = null;
         }
@@ -116,17 +124,31 @@ export function createWhatsAppBot({ taskService, backupService, reminderSchedule
         }
     }
 
-    async function sendReminder(task, overdue) {
-        if (!ownJid) return;
-        const time = formatTime(task.dueTime);
-        const header = overdue ? '⚠️ *TAREFA ATRASADA*' : '🔔 *LEMBRETE*';
-        const body = overdue
-            ? `Você ainda não concluiu:\n*${task.title}*\n⏰ Horário: ${time}`
-            : `Está na hora de:\n*${task.title}*\n⏰ ${time}`;
-        const text = `${header}\n${body}\n\nResponda:\n1️⃣ Concluir\n2️⃣ Adiar 30 min\n3️⃣ Cancelar\n\n(ou use: concluir #${task.id} / adiar #${task.id} <min> / cancelar #${task.id})`;
+    function startReminderPolling() {
+        stopReminderPolling();
+        pollTimer = setInterval(pollReminders, REMINDER_POLL_INTERVAL_MS);
+    }
 
-        activeReminderId = task.id;
-        await sock.sendMessage(ownJid, { text });
+    function stopReminderPolling() {
+        if (pollTimer) {
+            clearInterval(pollTimer);
+            pollTimer = null;
+        }
+    }
+
+    async function pollReminders() {
+        if (!ownJid) return;
+        let reminders;
+        try {
+            reminders = await apiClient.fetchPendingReminders();
+        } catch (err) {
+            console.error('[WhatsApp] Erro ao consultar lembretes pendentes:', err.message);
+            return;
+        }
+        for (const reminder of reminders) {
+            activeReminderId = reminder.taskId;
+            await sock.sendMessage(ownJid, { text: reminder.text });
+        }
     }
 
     return { start };

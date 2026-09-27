@@ -1,8 +1,5 @@
-import { openDatabase } from './db/database.js';
-import { TaskRepository } from './db/taskRepository.js';
-import { TaskService } from './services/taskService.js';
-import { BackupService } from './services/backupService.js';
-import { ReminderScheduler } from './services/reminderScheduler.js';
+import { ApiClient } from './services/apiClient.js';
+import { CommandHandler } from './bot/commandHandler.js';
 import { createWhatsAppBot } from './bot/whatsappClient.js';
 import { loadConfig } from './config.js';
 
@@ -10,31 +7,35 @@ async function main() {
     console.log('🤖 Assistente Pessoal para WhatsApp — iniciando...\n');
 
     const config = loadConfig();
-    const db = openDatabase();
-    const repository = new TaskRepository(db);
-    const taskService = new TaskService(repository);
-    const backupService = new BackupService(repository);
+    const apiClient = new ApiClient(config.backendUrl);
+    const commandHandler = new CommandHandler(apiClient);
 
-    const reminderScheduler = new ReminderScheduler(
-        taskService,
-        () => config.defaultReminderIntervalMinutes
-    );
+    await checkBackend(apiClient, config.backendUrl);
 
-    const bot = createWhatsAppBot({ taskService, backupService, reminderScheduler });
+    const bot = createWhatsAppBot({ commandHandler, apiClient });
     await bot.start();
-    reminderScheduler.start();
 
-    console.log('⏰ Agendador de lembretes ativo.');
     console.log('   Pressione Ctrl+C para encerrar.\n');
 
-    const shutdown = () => {
+    process.on('SIGINT', () => {
         console.log('\n👋 Encerrando...');
-        reminderScheduler.stop();
-        db.close();
         process.exit(0);
-    };
-    process.on('SIGINT', shutdown);
-    process.on('SIGTERM', shutdown);
+    });
+    process.on('SIGTERM', () => {
+        process.exit(0);
+    });
+}
+
+/** Avisa cedo se o backend Java nao estiver rodando, em vez de falhar so quando a primeira mensagem chegar. */
+async function checkBackend(apiClient, backendUrl) {
+    try {
+        await apiClient.fetchPendingReminders();
+        console.log(`✅ Backend conectado em ${backendUrl}`);
+    } catch (err) {
+        console.log(`⚠️  Não consegui falar com o backend em ${backendUrl} (${err.message}).`);
+        console.log('   Rode o AssistentePessoal-Backend antes (mvn spring-boot:run) - o bot funciona,');
+        console.log('   mas nenhuma tarefa será criada até o backend estar disponível.\n');
+    }
 }
 
 main().catch((err) => {

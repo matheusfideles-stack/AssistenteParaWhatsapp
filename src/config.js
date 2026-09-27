@@ -4,7 +4,8 @@ import path from 'node:path';
 const CONFIG_PATH = path.resolve(process.cwd(), 'config.json');
 
 const DEFAULTS = {
-    defaultReminderIntervalMinutes: 30,
+    // URL do backend Java (AssistentePessoal-Backend) rodando localmente.
+    backendUrl: 'http://localhost:8080',
 };
 
 /** Configuracao simples em config.json (criado com valores padrao se nao existir). */
